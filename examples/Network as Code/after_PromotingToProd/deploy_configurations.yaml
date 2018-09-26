@@ -1,0 +1,87 @@
+---
+- name: Deploy Cisco IOS-XE Router Configurations
+  connection: local
+  hosts: cisco-ios-xe-routers
+  gather_facts: no
+  vars:
+    creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ device_type }}"
+    ios_config_creds:
+      host: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+  tags: ios-xe
+  tasks:
+    - ios_config:
+        provider: "{{ ios_config_creds }}"
+        lines:
+          - path bootflash:archive
+          - write-memory
+        parents: archive
+    - napalm_install_config:
+        provider: "{{ creds }}"
+        config_file: "configs/{{ inventory_hostname }}"
+        commit_changes: True
+        replace_config: False
+      register: napalm_diff
+    - debug:
+        msg: "{{ item }}"
+      with_items: "{{ napalm_diff.msg.split('\n') }}"
+- name: Deploy Cisco NX-OS Configurations
+  connection: local
+  hosts: cisco-nxos
+  gather_facts: no
+  vars:
+    creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ device_type }}"
+- name: Deploy Cisco NX-OS Configurations
+  connection: local
+  hosts: cisco-nxos
+  gather_facts: no
+  vars:
+    creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ device_type }}"
+    nxos_config_creds:
+      host: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      transport: cli
+  tags: nxos
+  tasks:
+    - nxos_config:
+        provider: "{{ nxos_config_creds }}"
+        lines: "hostname {{ inventory_hostname }}"
+    - napalm_install_config:
+        provider: "{{ creds }}"
+        config_file: "configs/{{ inventory_hostname }}"
+        commit_changes: True
+        replace_config: False
+      register: napalm_diff
+    - debug:
+        msg: "{{ item }}"
+      with_items: "{{ napalm_diff.msg.split('\n') }}"
+- name: Deploy Cisco ASA Configurations
+  connection: local
+  hosts: cisco-asa
+  gather_facts: no
+  vars:
+    creds:
+      host: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ username }}"
+      authorize: yes
+      auth_pass: "{{ enable_password }}"
+  tags: asa
+  tasks:
+    - asa_config:
+        provider: "{{ creds }}"
+        src: "configs/{{ inventory_hostname }}"

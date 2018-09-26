@@ -1,0 +1,18 @@
+---
+- name: Validating our Ansible CFG File
+  gather_facts: no
+  hosts: csr
+  tasks:
+    - name: Gather IOS Facts
+      vars:
+        credentials:
+            host: "{{ ansible_host }}"
+            username: "{{ username }}"
+            password: "{{ password }}"
+      ios_facts:
+        provider: "{{ credentials }}"
+      register: ios_facts_output
+    - name: Print List Items
+      debug:
+        msg: "{{ item.key }}"
+      with_dict: "{{ ansible_net_interfaces }}"

@@ -1,0 +1,28 @@
+---
+- name: Handle This!
+  gather_facts: no
+  hosts: csr
+  vars:
+    credentials:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        timeout: 30
+  tasks:
+    - name: Build me an ACL!!
+      ios_config:
+        provider: "{{ credentials }}"
+        lines:
+          - permit ip host 1.1.1.1 host 8.8.8.8 log
+          - permit ip host 8.8.8.8 host 1.1.1.1 log
+          - permit ip host 2.2.2.2 host 8.8.8.8 log
+        parents: ip access-list extended test
+        match: exact
+        before: no ip access-list extended test
+      notify: "Save your work!"
+
+  handlers:
+    - name: Save your work!
+      ios_command:
+        provider: "{{ credentials }}"
+        commands: "wr"

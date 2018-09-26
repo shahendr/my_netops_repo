@@ -1,0 +1,223 @@
+!
+! Last configuration change at 11:26:01 PDT Thu May 24 2018 by ********
+!
+version 16.8
+service timestamps debug datetime msec
+service timestamps log datetime localtime show-timezone
+service password-encryption
+platform qfp utilization monitor load 80
+no platform punt-keepalive disable-kernel-core
+platform console virtual
+!
+hostname acme-sea-rtr1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vrf definition management
+ rd 1:1
+ !
+ address-family ipv4
+  route-target export 1:1
+  route-target import 1:1
+ exit-address-family
+!
+logging buffered 8192
+!
+no aaa new-model
+clock timezone PST -8 0
+clock summer-time PDT recurring
+!
+!
+!
+!
+!
+!
+!
+ip name-server 8.8.8.8 8.8.4.4
+ip domain name sea.acme.io
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+! 
+! 
+! 
+! 
+!
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+crypto pki trustpoint TP-self-signed-3667484044
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-3667484044
+ revocation-check none
+ rsakeypair TP-self-signed-3667484044
+!
+!
+crypto pki certificate chain TP-self-signed-3667484044
+ certificate self-signed 01
+  30820330 30820218 A0030201 02020101 300D0609 2A864886 F70D0101 05050030 
+  31312F30 2D060355 04031326 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 33363637 34383430 3434301E 170D3138 30353137 31323135 
+  32345A17 0D323030 31303130 30303030 305A3031 312F302D 06035504 03132649 
+  4F532D53 656C662D 5369676E 65642D43 65727469 66696361 74652D33 36363734 
+  38343034 34308201 22300D06 092A8648 86F70D01 01010500 0382010F 00308201 
+  0A028201 0100C572 1ABEEFCC 047E6527 926498A3 2C21808B 23EF0946 951D1EA9 
+  CBBFF17B 8CCCAE87 4C5E3B8F DB3BA442 C63EADDB A6C784E3 F4BB8A00 B5C1372B 
+  29089F8A 095850D6 7EE5EF3F 2F2549BC AD80AF47 1B1D0E36 E20A5B85 ADB95CBD 
+  B0F4B281 327A1B47 AE48DA71 1495E040 4832F5B2 0F7993B9 D2EEDC8A 4E7AED94 
+  76B50525 5348673E 78B2EEA6 0FB15CE7 3E38886F 726F09DB C5B94977 8F49F627 
+  D85A7D5C 00F1051B 057E8782 52E2FEF9 B8DB8542 974E45D2 EAC096EA 53AB2843 
+  B4C934A2 2F821C6D 15986FB0 B5C68761 72D60FEE 055BFEE2 4BD4B072 8C6B30FF 
+  280B6B11 9613ACEE 75EAF804 510B0FC7 E6542045 82A012D6 0A067FD4 401C2E5C 
+  03B12DE5 F3EF0203 010001A3 53305130 0F060355 1D130101 FF040530 030101FF 
+  301F0603 551D2304 18301680 14750C9A 5C1C6A51 70A48160 7C074CBA 0F519717 
+  40301D06 03551D0E 04160414 750C9A5C 1C6A5170 A481607C 074CBA0F 51971740 
+  300D0609 2A864886 F70D0101 05050003 82010100 170B312D FD16F59E 774B875B 
+  4D1AB009 0D172669 FF4EB1FB D23A740B 9305961B D25BC30F 63A0ECA4 491A2A0A 
+  B37FEBA0 26C757A9 CA0885AF BB1443C3 3959C904 303482E4 8B79223B 9447E2B7 
+  32FD8086 939FCA84 2A710444 F4544E6F AC97AB0D 916CD537 6377D27E F969B6FA 
+  C1340AA9 32853C7C C051C436 B886B522 C3A18807 80159A44 A84042E5 011C3354 
+  399016B8 49FE936C 542B55E4 DD8F0EE1 D3F69C71 6C835EA0 1BC98C70 E626B128 
+  9D810F4C 72EE1F78 BDF8270E 50463717 4A9DA712 D9E04930 8C63C10E 5EBE67DB 
+  6D69E14D 343DEA40 2DD72FD2 A4BD1FA9 928AC352 6E8984C6 147B0BD9 53E477F4 
+  4FFF3DCF 443F4AAE CA718FEC 34B4DA52 F04C5011
+  	quit
+!
+!
+!
+!
+!
+!
+!
+!
+license udi pid CSR1000V sn 9E42JNXTJAN
+no license smart enable
+diagnostic bootup level minimal
+!
+spanning-tree extend system-id
+archive
+ path bootflash:archive
+ write-memory
+!
+netconf-yang
+!
+restconf
+!
+username ignw privilege 15 password 7 094549070E
+!
+redundancy
+!
+!
+!
+!
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+! 
+! 
+!
+!
+interface Loopback0
+ description I made this with Python!
+ ip address 172.16.1.1 255.255.255.255
+!
+interface Loopback1
+ description IGNW was here!
+ ip address 8.8.4.4 255.255.255.255
+!
+interface Loopback2
+ description RESTCONNFFFFF WHY IS IT YELLING\!
+ ip address 172.16.1.2 255.255.255.255
+!
+interface Loopback8
+ ip address 8.8.8.8 255.255.255.255
+!
+interface GigabitEthernet1
+ description Management - Do not Modify!
+ vrf forwarding management
+ ip address 10.0.0.5 255.255.255.0
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet2
+ description to acme-sea-asa1
+ ip address 203.0.113.1 255.255.255.192
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+ip forward-protocol nd
+no ip http server
+ip http authentication local
+ip http secure-server
+ip route 10.255.255.2 255.255.255.255 203.0.113.2
+ip route vrf management 0.0.0.0 0.0.0.0 10.0.0.1
+!
+ip ssh version 2
+ip scp server enable
+!
+!
+ip access-list extended test
+ permit ip host 1.1.1.1 host 8.8.8.8 log
+ permit ip host 7.7.7.7 host 6.6.6.6 log
+ permit ip host 8.8.8.8 host 1.1.1.1 log
+ permit ip host 2.2.2.2 host 8.8.8.8 log
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+line con 0
+ stopbits 1
+line vty 0 4
+ login local
+!
+ntp master 5
+ntp server 45.76.244.193
+ntp server 173.255.206.154
+ntp server 66.228.42.59 prefer
+ntp server 204.9.54.119
+wsma agent exec
+!
+wsma agent config
+!
+wsma agent filesys
+!
+wsma agent notify
+!
+!
+end

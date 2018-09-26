@@ -1,0 +1,59 @@
+node {
+    stage ('Checkout Repository') {
+    deleteDir()
+    checkout scm
+    }
+
+    stage ('Setup Environment') {
+        sh 'python3 -m venv jenkins_build'
+        sh 'jenkins_build/bin/python -m pip install -r requirements.txt'
+        sh 'git clone https://github.com/carlniger/napalm-ansible'
+        sh 'cp -r napalm-ansible/napalm_ansible/ jenkins_build/lib/python3.6/site-packages/'
+        sh 'jenkins_build/bin/python napalm-ansible/setup.py install'
+        sh '''sed -i -e 's/\\/usr\\/local/jenkins_build/g' ansible.cfg'''
+        sh '''sed -i -e 's/dist-/site-/g' ansible.cfg'''
+        sh '''sed -i -e 's/\\/usr\\/bin/jenkins_build\\/bin/g' ansible.cfg'''
+        sh '''sed -i -e 's/\\/usr\\/bin\\/python3/\\/var\\/lib\\/jenkins\\/jobs\\/my_network_as_code\\/workspace\\/jenkins_build\\/bin\\/python/g' asa_scp.py'''
+    }
+
+    stage ('Validate Generate Configurations Playbook') {
+        sh 'ansible-playbook generate_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python" --syntax-check'
+    }
+
+    stage ('Render Configurations') {
+        sh 'ansible-playbook generate_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python"'
+    }
+
+    stage ('Unit Testing') {
+        sh 'ansible-playbook deploy_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python" --syntax-check'
+        sh 'ansible-playbook validate_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python" --syntax-check'
+        sh 'ansible-playbook backup_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python" --syntax-check'
+        sh 'ansible-playbook replace_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python" --syntax-check'
+    }
+
+    stage ('Backup Dev Configurations') {
+        sh 'ansible-playbook backup_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python"'
+    }
+
+    stage ('Deploy Configurations to Dev') {
+        sh 'ansible-playbook deploy_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python"'
+    }
+
+    stage ('Functional/Integration Testing') {
+        def r = sh(script: 'ansible-playbook validate_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python"', returnStatus: true)
+        if(r > 0) {
+            sh 'ansible-playbook replace_configurations.yaml -e "ansible_python_interpreter=jenkins_build/bin/python"'
+           currentBuild.result = 'ABORTED'
+           error('Integration testing FAILED')
+       }
+    }
+
+    stage ('Promote Configurations to Production') {
+        // Ping stuff and make sure we didn't blow up dev!
+    }
+
+    stage ('Production Functional/Integration Testing') {
+        // Ping stuff and make sure we didn't blow up prod!
+    }
+
+}
